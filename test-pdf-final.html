@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Teste PDF Final - Logo Corrigida</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>Teste PDF Final - Logo Branca Transparente Proporcional</h1>
+  <button onclick="generateFinalPDF()">Gerar PDF Final</button>
+  
+  <script>
+    const { jsPDF } = window.jspdf;
+    
+    async function generateFinalPDF() {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+      let y = 20;
+
+      // Header com logo
+      pdf.setFillColor(255, 107, 53);
+      pdf.rect(0, 0, pageWidth, 25, 'F');
+      
+      // Carregar e adicionar logo com proporção original
+      try {
+        const response = await fetch('/logo-icon.png');
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        await new Promise((resolve) => {
+          reader.onloadend = () => {
+            try {
+              // Logo com proporção original (2048x714 = 2.87:1)
+              // Altura 15mm, largura proporcional: 15 * 2.87 = 43mm
+              // Fundo transparente, logo branca
+              pdf.addImage(reader.result, 'PNG', margin, 5, 43, 15);
+              console.log('Logo adicionada: 43mm x 15mm (proporção original)');
+            } catch (e) {
+              console.error('Erro ao adicionar logo:', e);
+            }
+            resolve();
+          };
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.error('Erro ao carregar logo:', e);
+      }
+      
+      // Título centralizado
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('MATRIZ X - HOSHIN KANRI', pageWidth / 2, 15, { align: 'center' });
+
+      y = 35;
+
+      // Conteúdo de teste
+      pdf.setFillColor(74, 25, 66);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 10, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(12);
+      pdf.text('1. VISAO DE LONGO PRAZO', margin + 2, y + 7);
+      
+      y += 15;
+      pdf.setFontSize(10);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Logo: Fundo transparente + Branca + Proporcao original (2.87:1)', margin + 2, y);
+
+      // Salvar
+      pdf.save('Matriz_X_FINAL.pdf');
+      console.log('PDF gerado com sucesso!');
+    }
+  </script>
+</body>
+</html>
+
