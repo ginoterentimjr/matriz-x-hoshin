@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Diagnóstico de Fluxo da Coordenação</title>
+<style>
+  /* Layout: uma coluna de leitura de 720px, formulário em cima, devolução embaixo. Paleta Gino Terentim · Rethinking Learning. */
+  :root{
+    --bg:#F6F2EC; --card:#FBFAF7; --ink:#2A211C; --body:#5A5045; --muted:#8D8377;
+    --rule:#D3C7B6; --accent:#E5662C; --gold:#C9A24D; --dark:#1B1512; --dark-fg:#FBEEE5;
+    --ok:#3E7A4F; --warn:#B8912F; --crit:#B04A1C;
+    --fd:"Poppins",system-ui,sans-serif; --fb:"Poppins",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#1B1512; --card:#26201B; --ink:#FBEEE5; --body:#E2D8CC; --muted:#A79C8E; --rule:#4A4038;
+    --dark:#0F0C0A; --dark-fg:#FBEEE5; color-scheme:dark } }
+  :root[data-theme="dark"]{
+    --bg:#1B1512; --card:#26201B; --ink:#FBEEE5; --body:#E2D8CC; --muted:#A79C8E; --rule:#4A4038;
+    --dark:#0F0C0A; --dark-fg:#FBEEE5; color-scheme:dark }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--body);font-family:var(--fb);margin:0;padding-block:24px 48px;padding-inline:16px;line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1.5px solid var(--ink);padding-bottom:12px;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand b{display:block;font-size:14px;letter-spacing:.02em;color:var(--ink)}
+  .brand span{font-size:9px;letter-spacing:.34em;color:var(--muted)}
+  .mark{width:48px;height:auto;display:block}
+  .como{background:var(--card);border:1.5px solid var(--rule);border-radius:12px;padding:12px 14px;margin:0 0 20px}
+  .como ol{margin:0;padding-left:20px;font-size:14.5px;line-height:1.5;color:var(--ink)}
+  .como li{margin:4px 0}
+  .como b{color:var(--accent)}
+  .mini{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 3px;display:block}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .meta{text-align:right;font-size:9px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+  .meta b{display:block;color:var(--accent);font-size:9.5px}
+  .eyebrow{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px}
+  h1{font-family:var(--fd);font-size:clamp(24px,4.6vw,32px);line-height:1.15;color:var(--ink);margin:0 0 8px;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{font-size:15px;color:var(--body);margin:0 0 22px;max-width:62ch}
+  fieldset{border:0;padding:0;margin:0 0 18px}
+  label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+  input,textarea,select{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--card);border:1.5px solid var(--rule);border-radius:8px;padding:10px 12px;min-width:0}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  textarea{min-height:70px;resize:vertical}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+  @media (max-width:520px){ .g2,.g3{grid-template-columns:1fr} }
+  .etapa{background:var(--card);border:1.5px solid var(--rule);border-radius:12px;padding:14px;margin-bottom:10px;display:grid;gap:10px;grid-template-columns:36px 1fr}
+  .etapa .n{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .etapa .campos{display:grid;gap:8px;min-width:0}
+  .etapa input{padding:8px 10px;font-size:14px}
+  .hint{font-size:12.5px;color:var(--muted);margin:-2px 0 10px}
+  .acoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 8px}
+  button{font:inherit;font-weight:700;border-radius:999px;padding:12px 22px;border:1.5px solid transparent;cursor:pointer;font-size:15px}
+  .primary{background:var(--accent);color:#fff}
+  .primary:disabled{opacity:.55;cursor:default}
+  .ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+  .link{background:transparent;color:var(--accent);border:0;padding:8px 4px;font-weight:600}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .status{font-size:13px;color:var(--muted)}
+  .out{margin-top:24px}
+  .out h2{font-family:var(--fd);font-size:20px;color:var(--ink);margin:22px 0 8px;line-height:1.2}
+  .out h2 em{font-style:normal;color:var(--accent)}
+  .card{background:var(--card);border:1.5px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .card.dark{background:var(--dark);color:var(--dark-fg);border-color:var(--dark)}
+  .card.dark .tag{color:var(--gold)}
+  .tag{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+  .big{font-size:22px;font-weight:700;line-height:1.2;color:inherit}
+  .row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 10px;border-radius:999px;color:#fff;white-space:nowrap}
+  .pill.ok{background:var(--ok)} .pill.warn{background:var(--warn)} .pill.crit{background:var(--crit)}
+  .lim{display:grid;gap:6px}
+  .lim div{display:grid;grid-template-columns:1fr auto;gap:10px;border-bottom:1px solid var(--rule);padding:6px 0;font-size:14px}
+  .lim div b{color:var(--ink);font-variant-numeric:tabular-nums}
+  ul.d{margin:6px 0 0;padding-left:18px} ul.d li{margin:4px 0}
+  .opt{display:grid;grid-template-columns:1fr;gap:6px}
+  .opt .kv{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .opt .kv b{color:var(--ink);font-weight:600}
+  .quote{border-left:4px solid var(--accent);padding:6px 14px;font-size:17px;color:var(--ink);font-weight:600;margin:4px 0}
+  .raw{white-space:pre-wrap;font-size:14px}
+  .err{background:#FBE9E1;color:#7A2E12;border:1.5px solid #E5B7A3;border-radius:10px;padding:12px 14px;font-size:14px}
+  .prog{background:var(--card);border:1.5px solid var(--rule);border-radius:12px;padding:18px 18px 16px;margin-bottom:12px}
+  .prog .tit{font-size:17px;font-weight:700;color:var(--ink);line-height:1.25;margin:0 0 12px}
+  .prog .tit em{font-style:normal;color:var(--accent)}
+  .track{height:14px;border-radius:999px;background:var(--rule);overflow:hidden;position:relative}
+  .fill{height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .6s ease-out;
+    background-image:linear-gradient(45deg,rgba(255,255,255,.22) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.22) 50%,rgba(255,255,255,.22) 75%,transparent 75%);background-size:22px 22px}
+  @media (prefers-reduced-motion:no-preference){ .fill{animation:listras 1s linear infinite} @keyframes listras{to{background-position:22px 0}} }
+  .pct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:6px 0 12px;font-variant-numeric:tabular-nums}
+  .pct b{color:var(--ink)}
+  .passos{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .passos li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;font-size:14.5px;color:var(--muted);line-height:1.4}
+  .passos .ic{width:22px;height:22px;border-radius:50%;border:2px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+  .passos li.on{color:var(--ink);font-weight:600}
+  .passos li.on .ic{border-color:var(--accent);border-top-color:transparent}
+  @media (prefers-reduced-motion:no-preference){ .passos li.on .ic{animation:gira .9s linear infinite} @keyframes gira{to{transform:rotate(360deg)}} }
+  .passos li.ok{color:var(--body)}
+  .passos li.ok .ic{background:var(--ok);border-color:var(--ok)}
+  .passos small{display:block;font-weight:500;color:var(--accent);font-size:13px}
+  .calma{font-size:13px;color:var(--muted);margin:12px 0 0}
+  .ia{background:var(--dark);color:var(--dark-fg);border-radius:14px;padding:18px 18px 16px;margin:18px 0 12px}
+  .ia .tag{color:var(--gold)}
+  .ia p{margin:6px 0 12px;font-size:14.5px;color:#E2D8CC}
+  .ia a.abrir{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:700;font-size:16px;text-decoration:none;border-radius:999px;padding:14px 18px;margin:0 0 10px}
+  .ia a.abrir.alt{background:transparent;border:1.5px solid var(--accent);color:#fff}
+  .ia button.copiar{display:block;width:100%;background:transparent;color:var(--dark-fg);border:1.5px solid #6B5F54;border-radius:999px;padding:12px 18px;font-size:15px}
+  .ia .ok{font-size:13.5px;color:var(--gold);min-height:20px;margin:8px 0 6px;font-weight:600}
+  .ia textarea{min-height:150px;font-size:13px;line-height:1.45;background:#26201B;color:#E2D8CC;border-color:#4A4038}
+  .ia .mini{color:#A79C8E}
+  footer{margin-top:36px;padding-top:12px;border-top:1px solid var(--rule);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer b{color:var(--accent)}
+  @media (prefers-reduced-motion:no-preference){ .card{transition:opacity .25s} }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="brand"><img class="mark" src="data:image/png;base64,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" alt=""><div><b>GINO TERENTIM</b><span>RETHINKING LEARNING</span></div></div>
+    <div class="meta"><b>Diagnóstico de fluxo</b><span>CNI · Programa Ambição Digital</span></div>
+  </header>
+
+  <div class="eyebrow">Ferramenta da oficina 2 · Melhoria contínua e gestão do fluxo</div>
+  <h1>Descreva um fluxo da sua coordenação <em>e receba um diagnóstico para decidir.</em></h1>
+  <div class="como"><ol><li><b>Preencha</b> os campos abaixo. Para testar antes, toque em <b>Preencher com o exemplo da oficina</b>.</li><li>Toque em <b>Gerar diagnóstico</b>: a conta da fila, o gargalo, os limites e três experimentos aparecem na hora. Não precisa de conta nem de cadastro.</li><li>Se quiser uma segunda opinião, toque em <b>Perguntar a uma IA</b>: a pergunta já vai pronta.</li></ol></div>
+
+  <form id="f" autocomplete="off">
+    <fieldset>
+      <div class="g2">
+        <div><label for="fluxo">Nome do fluxo</label><input id="fluxo" placeholder="Ex.: atendimento de demanda interna de capacitação"></div>
+        <div><label for="coord">Coordenação e entidade</label><input id="coord" placeholder="Ex.: Coordenação de Gestão de Pessoas · CNI"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <div class="g3">
+        <div><label for="vol">Demandas abertas hoje</label><input id="vol" type="text" inputmode="numeric" placeholder="Ex.: 18"></div>
+        <div><label for="chegam">Concluídas por semana</label><input id="chegam" type="text" inputmode="numeric" placeholder="Ex.: 6"></div>
+        <div><label for="pessoas">Pessoas no fluxo</label><input id="pessoas" type="text" inputmode="numeric" placeholder="Ex.: 4"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <label>As etapas, na ordem em que acontecem</label>
+      <p class="hint">Dias de trabalho: quanto alguém de fato atua na demanda nesta etapa. Dias de espera: quanto ela fica parada antes de alguém atuar. Meio dia: escreva 0,5.</p>
+      <div id="etapas"></div>
+      <button type="button" class="link" id="mais">+ acrescentar etapa</button>
+    </fieldset>
+
+    <fieldset>
+      <label for="dor">O que mais incomoda neste fluxo hoje</label>
+      <textarea id="dor" placeholder="Ex.: as demandas ficam paradas esperando aprovação e o solicitante cobra por e-mail"></textarea>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="primary" id="go">Gerar diagnóstico</button>
+      <button type="button" class="ghost" id="exemplo">Preencher com o exemplo da oficina</button>
+      <span class="status" id="st"></span>
+    </div>
+  </form>
+
+  <section class="out" id="out" hidden></section>
+
+  <footer><span>Diagnóstico de fluxo · Oficina 2 · CNI</span><b>Gino Terentim · Rethinking Learning</b></footer>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const etapasEl=$("#etapas"); let n=0;
+  function addEtapa(v){
+    n++; const id=n;
+    const d=document.createElement("div"); d.className="etapa"; d.dataset.id=id;
+    d.innerHTML=`<div class="n">${id}</div><div class="campos">
+      <div><span class="mini">O que acontece</span><input id="e${id}n" placeholder="Ex.: aprova a demanda" aria-label="Etapa ${id}: o que acontece"></div>
+      <div><span class="mini">Quem faz (função, sem nome)</span><input id="e${id}q" placeholder="Ex.: coordenador" aria-label="Etapa ${id}: quem faz"></div>
+      <div class="duo">
+        <div><span class="mini">Dias de trabalho</span><input id="e${id}t" type="text" inputmode="decimal" placeholder="Ex.: 0,5" aria-label="Etapa ${id}: dias de trabalho"></div>
+        <div><span class="mini">Dias de espera</span><input id="e${id}e" type="text" inputmode="decimal" placeholder="Ex.: 3" aria-label="Etapa ${id}: dias de espera"></div>
+      </div></div>`;
+    etapasEl.appendChild(d);
+    if(v){ $(`#e${id}n`).value=v[0]; $(`#e${id}q`).value=v[1]; $(`#e${id}t`).value=v[2]; $(`#e${id}e`).value=v[3]; }
+    $("#mais").hidden = n>=6;
+  }
+  for(let i=0;i<3;i++) addEtapa();
+  $("#mais").onclick=()=>addEtapa();
+
+  $("#exemplo").onclick=()=>{
+    etapasEl.innerHTML=""; n=0;
+    $("#fluxo").value="Atendimento de demanda interna, da solicitação à entrega";
+    $("#coord").value="Coordenação de Gestão de Pessoas · CNI (exemplo ilustrativo)";
+    $("#vol").value="18"; $("#chegam").value="6"; $("#pessoas").value="5";
+    [["Recebe e registra a demanda","Analista de atendimento","0,5","1"],
+     ["Analisa e enquadra","Analista técnico","1","2"],
+     ["Aprova","Coordenador","0,5","6"],
+     ["Executa","Equipe técnica","3","1"],
+     ["Entrega e comunica","Analista de atendimento","0,5","0,5"]].forEach(addEtapa);
+    $("#dor").value="Demandas ficam paradas na aprovação; o coordenador aprova em lote uma vez por semana e o solicitante cobra por e-mail.";
+    $("#st").textContent="Exemplo carregado. Ele é ilustrativo e pode ser editado.";
+  };
+
+  function num(v){ const x=parseFloat(String(v??"").trim().replace(/\s/g,"").replace(",",".")); return isFinite(x)&&x>=0?x:0; }
+  function coleta(){
+    const et=[]; for(let i=1;i<=n;i++){ const nm=$(`#e${i}n`); if(!nm) continue;
+      if(!nm.value.trim()) continue;
+      et.push({etapa:nm.value.trim(),quem:$(`#e${i}q`).value.trim(),trabalho:num($(`#e${i}t`).value),espera:num($(`#e${i}e`).value)}); }
+    return {fluxo:$("#fluxo").value.trim(),coordenacao:$("#coord").value.trim(),abertas:num($("#vol").value),
+            chegam_semana:num($("#chegam").value),pessoas:num($("#pessoas").value),etapas:et,incomodo:$("#dor").value.trim()};
+  }
+
+  const fmt=x=>(Math.round(x*10)/10).toLocaleString("pt-BR");
+  function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+  // conta feita na própria página: nada sai do aparelho
+  function calcula(d){
+    const tt=d.etapas.reduce((a,e)=>a+e.trabalho,0), te=d.etapas.reduce((a,e)=>a+e.espera,0), tot=tt+te;
+    let g=d.etapas[0];
+    d.etapas.forEach(e=>{ if(e.espera>g.espera || (e.espera===g.espera && e.trabalho>g.trabalho)) g=e; });
+    const pe=tot?Math.round(100*te/tot):0, sem=d.abertas/d.chegam_semana, prim=d.etapas[0];
+    const desp=[];
+    if(pe>=30) desp.push({tipo:"Espera", ev:`${pe}% do tempo de uma demanda é espera: ${fmt(te)} de ${fmt(tot)} dias. A maior parte está antes de “${g.etapa}”.`});
+    if(sem>=1.5) desp.push({tipo:"Estoque (trabalho iniciado e não concluído)", ev:`${fmt(d.abertas)} demandas abertas para ${fmt(d.chegam_semana)} concluídas por semana: uma demanda nova espera ${fmt(sem)} ${fmt(sem)==="1"?"semana":"semanas"}.`});
+    if(!desp.length) desp.push({tipo:"Nenhum desperdício evidente pela conta", ev:"A espera e a fila estão baixas. Vale olhar retrabalho, conferências repetidas e passagens de mão, que a conta não enxerga."});
+    const fila = g.espera >= 2*g.trabalho;
+    const exps=[
+      fila ? {titulo:`Atender “${g.etapa}” todos os dias, em horário fixo`, o_que:`Quinze minutos por dia para dar andamento ao que chegou a “${g.etapa}”, no lugar de acumular e resolver em lote.`, custo:"baixo", risco:"baixo", medir:`dias de espera em “${g.etapa}” (hoje: ${fmt(g.espera)})`}
+           : {titulo:`Tirar de “${g.etapa}” o que outra etapa pode fazer`, o_que:`Listar as tarefas de “${g.etapa}” e passar à etapa anterior as que não exigem quem faz essa etapa.`, custo:"baixo", risco:"baixo", medir:`dias de trabalho em “${g.etapa}” (hoje: ${fmt(g.trabalho)})`},
+      {titulo:`Limite de andamento: 1 em “${g.etapa}”, 2 nas demais`, o_que:"Ninguém começa demanda nova com a etapa seguinte cheia. Quem fica sem demanda ajuda a etapa do gargalo.", custo:"baixo", risco:"médio", medir:`demandas abertas (hoje: ${fmt(d.abertas)}) e semanas de espera (hoje: ${fmt(sem)})`},
+      {titulo:"A demanda só entra completa", o_que:`Uma lista de conferência em “${prim.etapa}”: o que falta volta ao solicitante antes de entrar na fila.`, custo:"médio", risco:"médio", medir:"demandas devolvidas por semana"}];
+    const part = te ? Math.round(100*g.espera/te) : 0;
+    const grav = part>=50 ? "alta" : part>=30 ? "média" : "baixa";
+    const perg_equipe = fila
+      ? `O que faz uma demanda esperar ${fmt(g.espera)} ${g.espera===1?"dia":"dias"} antes de “${g.etapa}”: falta informação para decidir, falta prioridade ou falta tempo de quem faz essa etapa?`
+      : `O que em “${g.etapa}” exige de fato quem faz essa etapa, e o que outra etapa poderia fazer antes?`;
+    return {tt, te, tot, pe, sem, part, grav, perg_equipe, gargalo:g, desp, exps,
+            limites: d.etapas.map(e=>({etapa:e.etapa, limite: e===g?1:2}))};
+  }
+
+  function pergunta(d,c){
+    return `Sou coordenador(a) no Sistema Indústria e participo de uma oficina de melhoria contínua e gestão do fluxo. Analise o fluxo abaixo e responda em português do Brasil, em linguagem simples e respeitosa, tratando os achados como características do processo, sem apontar pessoas ou áreas como causa.
+
+Fluxo: ${d.fluxo||"(sem nome)"}${d.coordenacao?" · "+d.coordenacao:""}
+Demandas abertas hoje: ${fmt(d.abertas)}. Concluídas por semana: ${fmt(d.chegam_semana)}.${d.pessoas?" Pessoas no fluxo: "+fmt(d.pessoas)+".":""}
+Etapas (dias de trabalho / dias de espera):
+${d.etapas.map((e,i)=>`${i+1}. ${e.etapa}${e.quem?" ("+e.quem+")":""}: ${fmt(e.trabalho)} / ${fmt(e.espera)}`).join("\n")}
+O que mais incomoda: ${d.incomodo||"(não informado)"}
+
+Já calculei: tempo de espera pela Lei de Little = ${fmt(c.sem)} semanas; ${c.pe}% do tempo é espera; gargalo provável = ${c.gargalo.etapa}.
+
+Entregue, nesta ordem e de forma curta:
+1. Se concorda com o gargalo, e por quê.
+2. De dois a quatro desperdícios do Lean presentes neste fluxo, cada um com a evidência.
+3. Três experimentos de duas semanas, do mais barato ao mais ambicioso, cada um com custo, risco e indicador.
+4. A pergunta que devo fazer à equipe antes de decidir.`;
+  }
+
+  $("#f").addEventListener("submit", ev=>{
+    ev.preventDefault();
+    const d=coleta();
+    if(d.etapas.length<2){ $("#st").textContent="Descreva ao menos duas etapas (o campo “O que acontece” de cada uma)."; return; }
+    if(!d.abertas||!d.chegam_semana){ $("#st").textContent="Preencha as demandas abertas hoje e as concluídas por semana: são os números da conta do tempo."; return; }
+    const c=calcula(d); render(d,c);
+    $("#st").textContent="Diagnóstico pronto. Role para ler.";
+    $("#out").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  function render(d,c){
+    const out=$("#out"); out.hidden=false;
+    const q=pergunta(d,c), g=c.gargalo;
+    out.innerHTML=`
+      <h2>Leitura do fluxo <em>${esc(d.fluxo||"")}</em></h2>
+      <div class="card dark"><div class="tag">Lei de Little · quanto uma demanda nova espera</div><div class="big">${fmt(c.sem)} ${fmt(c.sem)==="1"?"semana":"semanas"}</div><p style="margin:6px 0 0">${fmt(d.abertas)} demandas abertas ÷ ${fmt(d.chegam_semana)} concluídas por semana.</p></div>
+      <div class="card"><div class="tag">Onde o tempo vai</div>
+        <div class="lim"><div><span>Tempo de trabalho somado</span><b>${fmt(c.tt)} dias</b></div><div><span>Tempo de espera somado</span><b>${fmt(c.te)} dias</b></div><div><span>Espera sobre o total</span><b>${c.pe}%</b></div></div></div>
+      <div class="card"><div class="row"><div><div class="tag">Gargalo provável</div><div class="big">${esc(g.etapa)}</div><p style="margin:8px 0 0">É a etapa em que a demanda mais espera: ${fmt(g.espera)} ${g.espera===1?"dia":"dias"} de espera para ${fmt(g.trabalho)} de trabalho. Ela concentra ${c.part}% da espera do fluxo.</p></div><span class="pill crit">gravidade ${c.grav}</span></div></div>
+      <h2>Limite de trabalho em andamento <em>para começar</em></h2>
+      <div class="card"><div class="lim">${c.limites.map(x=>`<div><span>${esc(x.etapa)}</span><b>${x.limite}</b></div>`).join("")}</div><p class="hint" style="margin:10px 0 0">Ponto de partida da oficina: dois por etapa e um no gargalo. O limite se ajusta depois de duas semanas de observação.</p></div>
+      <h2>Desperdícios <em>que a conta já mostra</em></h2>
+      ${c.desp.map(x=>`<div class="card"><div class="tag">${esc(x.tipo)}</div><p style="margin:0">${esc(x.ev)}</p></div>`).join("")}
+      <h2>Três experimentos <em>de duas semanas, para escolher um</em></h2>
+      ${c.exps.map((x,i)=>`<div class="card opt"><div class="tag">Opção ${i+1}</div><div class="big" style="font-size:18px">${esc(x.titulo)}</div><p style="margin:4px 0">${esc(x.o_que)}</p><div class="kv"><span>Custo <b>${esc(x.custo)}</b></span><span>Risco <b>${esc(x.risco)}</b></span><span>Medir por <b>${esc(x.medir)}</b></span></div></div>`).join("")}
+      <p class="hint">Ponto de partida, montado a partir dos seus números. A dupla adapta e escolhe um, ou propõe um quarto.</p>
+      <h2>A pergunta <em>a fazer à equipe antes de decidir</em></h2>
+      <div class="card dark"><p style="margin:0;font-size:17px;line-height:1.45">${esc(c.perg_equipe)}</p></div>
+      <div class="ia"><div class="tag">Segunda opinião · perguntar a uma IA</div>
+        <p>A pergunta abaixo já leva os dados e a conta desta dupla. Toque em uma opção, envie e compare a resposta com o que a ferramenta mostrou. Sem dado pessoal, sigiloso ou classificado.</p>
+        <a class="abrir" target="_blank" rel="noopener noreferrer" href="https://chatgpt.com/?q=${encodeURIComponent(q)}">Perguntar ao ChatGPT</a>
+        <a class="abrir alt" target="_blank" rel="noopener noreferrer" href="https://copilot.microsoft.com/?q=${encodeURIComponent(q)}">Perguntar ao Copilot</a>
+        <button type="button" class="copiar" id="copiar">Copiar a pergunta (para outra IA)</button>
+        <div class="ok" id="okc" role="status"></div>
+        <span class="mini">A pergunta que será enviada</span>
+        <textarea id="perg" readonly aria-label="Pergunta pronta para a IA">${esc(q)}</textarea>
+      </div>
+      <p class="hint" style="margin-top:14px">A conta foi feita nesta página, com o que a dupla descreveu. Confira os números com a equipe antes de agir: a ferramenta e a IA organizam a evidência; a decisão é da coordenação.</p>`;
+    $("#copiar").onclick=async()=>{
+      const ta=$("#perg"); let ok=false;
+      try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){
+        try{ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length); ok=document.execCommand("copy"); }catch(e2){ ok=false; } }
+      $("#okc").textContent= ok ? "Pergunta copiada. Abra a IA que preferir e cole." : "Toque no texto abaixo, selecione tudo e copie.";
+    };
+  }
+})();
+</script>
+
+</body>
+</html>
